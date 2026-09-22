@@ -9,6 +9,8 @@ WIDTH = 800
 HEIGHT = 600
 GAME_FONT = pygame.freetype.Font("Aloevera.ttf", 20)
 SMALL_FONT = pygame.freetype.Font("Aloevera.ttf", 12)
+INPUT_FONT = pygame.freetype.Font("Aloevera.ttf", 18)
+NUMS = pygame.freetype.Font("Swansea.ttf", 22)
 STARTING_MASS = 5
 
 # boilerplate
@@ -33,10 +35,15 @@ class Panel:
   input_obj = pygame.Rect(ipos[0], ipos[1], idimensions[0], idimensions[1])
   text_active = False
 
+  field_text = str(STARTING_MASS)
+
   # submit button settings
   bd = [60, 25]
   bpos = [pos[0] + dimensions[0]/2 - 30, ipos[1]+40]
   b_object = pygame.Rect(bpos[0], bpos[1], bd[0], bd[1])
+
+  def update(self, new_field_text):
+    self.field_text = new_field_text
 
   def render(self):
     pygame.draw.rect(screen, self.background, self.rect_obj, 2)
@@ -51,6 +58,8 @@ class Panel:
     pygame.draw.rect(screen, WHITE, self.b_object, 2)
     SMALL_FONT.render_to(screen, (self.bpos[0]+15, self.bpos[1]+10), "SET", WHITE)
 
+    NUMS.render_to(screen, (self.ipos[0] + 10,self.ipos[1] + 8), self.field_text, WHITE)
+
 
 class Body:
   pass
@@ -58,6 +67,7 @@ class Body:
 class Game:
   running = True
   panel = Panel()
+  cur_mass = STARTING_MASS
   def handle_input(self):
     # quit game response
     for event in pygame.event.get():
@@ -70,6 +80,19 @@ class Game:
           self.panel.text_active = True
         else:
           self.panel.text_active = False
+
+        if self.panel.b_object.collidepoint(event.pos):
+          self.panel.update(int(self.panel.field_text))
+
+      if self.panel.text_active and event.type == pygame.KEYDOWN:
+        if (event.key == pygame.K_RETURN):
+          self.panel.text_active = False
+        elif (event.key == pygame.K_BACKSPACE):
+          self.panel.update(self.panel.field_text[:-1])
+        else:
+          self.panel.update(self.panel.field_text + event.unicode)
+
+      
 
   def draw(self):
     # background
