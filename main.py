@@ -1,5 +1,7 @@
 import pygame
-import pygame.freetype
+import pygame.freetype\
+
+from helpers import *
 
 pygame.init()
 
@@ -66,17 +68,20 @@ class Body:
   velocity = [2, 0]
   mass = 5
 
+
   def __init__(self, pos, vel, mass=5):
     self.position = pos
     self.velocity = vel
     self.mass = mass
+    self.radius = radius_from_mass(mass)
+    self.color = color_from_mass(mass)
 
 class Game:
   running = True
   panel = Panel()
   cur_mass = STARTING_MASS
 
-  bodies = [Body([300, 200], [0, 0]), 
+  bodies = [Body([300, 200], [0, 0], 100), 
   Body([150, 200], [0, 0]),
   Body([300, 250], [0, 0]),
   Body([300, 100], [0, 0])
@@ -126,7 +131,7 @@ class Game:
 
     # render all the points
     for body in self.bodies:
-      pygame.draw.circle(screen, WHITE, (body.position[0], body.position[1]), 5)
+      pygame.draw.circle(screen, body.color, (body.position[0], body.position[1]), body.radius)
 
     # ignore boilerplate
     self.panel.render()
