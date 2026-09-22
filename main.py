@@ -62,12 +62,39 @@ class Panel:
 
 
 class Body:
-  pass
+  position = [200, 200]
+  velocity = [2, 0]
+  mass = 5
+
+  def __init__(self, pos, vel, mass=5):
+    self.position = pos
+    self.velocity = vel
+    self.mass = mass
 
 class Game:
   running = True
   panel = Panel()
   cur_mass = STARTING_MASS
+
+  bodies = [Body([300, 200], [0, 0]), 
+  Body([150, 200], [0, 0]),
+  Body([300, 250], [0, 0]),
+  Body([300, 100], [0, 0])
+            ] # collection of bodies really
+
+  def update_mass(self, new_mass):
+    try:
+      valid = int(new_mass)
+    except:
+      self.panel.update(str(self.cur_mass))
+      return
+
+    if (valid < 0):
+      self.panel.update(str(self.cur_mass))
+      return
+
+    self.cur_mass = valid
+
   def handle_input(self):
     # quit game response
     for event in pygame.event.get():
@@ -76,13 +103,12 @@ class Game:
 
       if event.type == pygame.MOUSEBUTTONDOWN:
         if self.panel.input_obj.collidepoint(event.pos):
-          print("clicked me ")
           self.panel.text_active = True
         else:
           self.panel.text_active = False
 
         if self.panel.b_object.collidepoint(event.pos):
-          self.panel.update(int(self.panel.field_text))
+          self.update_mass(self.panel.field_text)
 
       if self.panel.text_active and event.type == pygame.KEYDOWN:
         if (event.key == pygame.K_RETURN):
@@ -98,9 +124,12 @@ class Game:
     # background
     screen.fill("black")
 
-    self.panel.render()
-    
+    # render all the points
+    for body in self.bodies:
+      pygame.draw.circle(screen, WHITE, (body.position[0], body.position[1]), 5)
+
     # ignore boilerplate
+    self.panel.render()
     pygame.display.flip()
     clock.tick()
 
