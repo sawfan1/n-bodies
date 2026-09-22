@@ -7,10 +7,10 @@ pygame.init()
 FPS = 60
 WIDTH = 800
 HEIGHT = 600
-GAME_FONT = pygame.freetype.Font("Aloevera.ttf", 20)
-SMALL_FONT = pygame.freetype.Font("Aloevera.ttf", 12)
-INPUT_FONT = pygame.freetype.Font("Aloevera.ttf", 18)
-NUMS = pygame.freetype.Font("Swansea.ttf", 22)
+GAME_FONT = pygame.freetype.Font("fonts/Aloevera.ttf", 20)
+SMALL_FONT = pygame.freetype.Font("fonts/Aloevera.ttf", 12)
+INPUT_FONT = pygame.freetype.Font("fonts/Aloevera.ttf", 18)
+NUMS = pygame.freetype.Font("fonts/Swansea.ttf", 22)
 STARTING_MASS = 5
 
 # boilerplate
