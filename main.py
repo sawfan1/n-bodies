@@ -2,209 +2,215 @@ import pygame
 import pygame.freetype
 from math import sqrt
 from random import randint
+import asyncio
 
 from helpers import *
 
-pygame.init()
 
-decay = input("Type W if you want decay, any other string disables it: ")
-decay = decay == "W"
+async def main():
+  pygame.init()
 
-# parameters
-FPS = 60
-WIDTH = 800
-HEIGHT = 600
-GAME_FONT = pygame.freetype.Font("fonts/Aloevera.ttf", 20)
-SMALL_FONT = pygame.freetype.Font("fonts/Aloevera.ttf", 12)
-INPUT_FONT = pygame.freetype.Font("fonts/Aloevera.ttf", 18)
-NUMS = pygame.freetype.Font("fonts/Swansea.ttf", 22)
-STARTING_MASS = 5
+  decay = False
 
-# boilerplate
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-clock = pygame.time.Clock()
+  # parameters
+  FPS = 60
+  WIDTH = 800
+  HEIGHT = 600
+  GAME_FONT = pygame.freetype.Font("fonts/Aloevera.ttf", 20)
+  SMALL_FONT = pygame.freetype.Font("fonts/Aloevera.ttf", 12)
+  INPUT_FONT = pygame.freetype.Font("fonts/Aloevera.ttf", 18)
+  NUMS = pygame.freetype.Font("fonts/Swansea.ttf", 22)
+  STARTING_MASS = 5
 
-# extraneous variables
-WHITE = (255, 255, 255)
+  # boilerplate
+  screen = pygame.display.set_mode((WIDTH, HEIGHT))
+  clock = pygame.time.Clock()
 
-class Panel:
-  margin = 20
-  dimensions = [200, 120]
-  pos = [WIDTH-dimensions[0]-margin, margin]
-  background = WHITE
-  text_color = WHITE
-  text = "Body mass: (KG)"
-  rect_obj = pygame.Rect(pos[0], pos[1], dimensions[0], dimensions[1])
+  # extraneous variables
+  WHITE = (255, 255, 255)
 
-  # input rectangle settings
-  ipos = [pos[0] + 15, pos[1] + 45]
-  idimensions = [dimensions[0]-30, 30]
-  input_obj = pygame.Rect(ipos[0], ipos[1], idimensions[0], idimensions[1])
-  text_active = False
+  class Panel:
+    margin = 20
+    dimensions = [200, 120]
+    pos = [WIDTH-dimensions[0]-margin, margin]
+    background = WHITE
+    text_color = WHITE
+    text = "Body mass: (KG)"
+    rect_obj = pygame.Rect(pos[0], pos[1], dimensions[0], dimensions[1])
 
-  field_text = str(STARTING_MASS)
+    # input rectangle settings
+    ipos = [pos[0] + 15, pos[1] + 45]
+    idimensions = [dimensions[0]-30, 30]
+    input_obj = pygame.Rect(ipos[0], ipos[1], idimensions[0], idimensions[1])
+    text_active = False
 
-  # submit button settings
-  bd = [60, 25]
-  bpos = [pos[0] + dimensions[0]/2 - 30, ipos[1]+40]
-  b_object = pygame.Rect(bpos[0], bpos[1], bd[0], bd[1])
+    field_text = str(STARTING_MASS)
 
-  def update(self, new_field_text):
-    self.field_text = new_field_text
+    # submit button settings
+    bd = [60, 25]
+    bpos = [pos[0] + dimensions[0]/2 - 30, ipos[1]+40]
+    b_object = pygame.Rect(bpos[0], bpos[1], bd[0], bd[1])
 
-  def render(self):
-    pygame.draw.rect(screen, self.background, self.rect_obj, 2)
-    GAME_FONT.render_to(screen, (self.pos[0] + 15, self.pos[1] + 15), self.text, WHITE)
+    def update(self, new_field_text):
+      self.field_text = new_field_text
 
-    if self.text_active:
-      bg = (0, 0, 255)
-    else:
-      bg = WHITE
+    def render(self):
+      pygame.draw.rect(screen, self.background, self.rect_obj, 2)
+      GAME_FONT.render_to(screen, (self.pos[0] + 15, self.pos[1] + 15), self.text, WHITE)
 
-    pygame.draw.rect(screen, bg, self.input_obj, 2)
-    pygame.draw.rect(screen, WHITE, self.b_object, 2)
-    SMALL_FONT.render_to(screen, (self.bpos[0]+15, self.bpos[1]+10), "SET", WHITE)
+      if self.text_active:
+        bg = (0, 0, 255)
+      else:
+        bg = WHITE
 
-    NUMS.render_to(screen, (self.ipos[0] + 10,self.ipos[1] + 8), self.field_text, WHITE)
+      pygame.draw.rect(screen, bg, self.input_obj, 2)
+      pygame.draw.rect(screen, WHITE, self.b_object, 2)
+      SMALL_FONT.render_to(screen, (self.bpos[0]+15, self.bpos[1]+10), "SET", WHITE)
+
+      NUMS.render_to(screen, (self.ipos[0] + 10,self.ipos[1] + 8), self.field_text, WHITE)
 
 
-class Button:
-  dimensions = [60, 30]
-  position = [(WIDTH-dimensions[0])/2, 500]
-  text = "ADD"
-  rect_obj = pygame.Rect(position[0], position[1], dimensions[0], dimensions[1])
+  class Button:
+    dimensions = [60, 30]
+    position = [(WIDTH-dimensions[0])/2, 500]
+    text = "ADD"
+    rect_obj = pygame.Rect(position[0], position[1], dimensions[0], dimensions[1])
 
-  def render(self):
-    pygame.draw.rect(screen, WHITE, self.rect_obj, 2)
-    GAME_FONT.render_to(screen, (self.position[0] + 10, self.position[1] + 10), self.text, WHITE)
+    def render(self):
+      pygame.draw.rect(screen, WHITE, self.rect_obj, 2)
+      GAME_FONT.render_to(screen, (self.position[0] + 10, self.position[1] + 10), self.text, WHITE)
 
-class Body:
-  position = [200, 200]
-  velocity = [2, 0]
-  mass = 5
+  class Body:
+    position = [200, 200]
+    velocity = [2, 0]
+    mass = 5
 
-  def update_rc(self):
-    self.radius = radius_from_mass(self.mass)
+    def update_rc(self):
+      self.radius = radius_from_mass(self.mass)
 
-  def __init__(self, pos, vel, mass=5):
-    self.position = pos
-    self.velocity = vel
-    self.mass = mass
-    self.radius = radius_from_mass(mass)
-    self.color = color_from_mass(mass)
+    def __init__(self, pos, vel, mass=5):
+      self.position = pos
+      self.velocity = vel
+      self.mass = mass
+      self.radius = radius_from_mass(mass)
+      self.color = color_from_mass(mass)
 
-class Game:
-  running = True
-  panel = Panel()
-  addition = Button()
-  cur_mass = STARTING_MASS
+  class Game:
+    running = True
+    panel = Panel()
+    addition = Button()
+    cur_mass = STARTING_MASS
 
-  bodies = [Body([300, 200], [0, 0], 20),
-  Body([150, 200], [5, 1], 40),
-  Body([300, 250], [-4, 20], 100),
-  Body([300, 100], [3, -20], 70),
-  Body([400, 100], [-7, 6], 120),
-            ] # collection of bodies really
+    bodies = [Body([300, 200], [0, 0], 20),
+    Body([150, 200], [5, 1], 40),
+    Body([300, 250], [-4, 20], 100),
+    Body([300, 100], [3, -20], 70),
+    Body([400, 100], [-7, 6], 120),
+              ] # collection of bodies really
 
-  def update_mass(self, new_mass):
-    try:
-      valid = int(new_mass)
-    except:
-      self.panel.update(str(self.cur_mass))
-      return
+    def update_mass(self, new_mass):
+      try:
+        valid = int(new_mass)
+      except:
+        self.panel.update(str(self.cur_mass))
+        return
 
-    if (valid < 0):
-      self.panel.update(str(self.cur_mass))
-      return
+      if (valid < 0):
+        self.panel.update(str(self.cur_mass))
+        return
 
-    self.cur_mass = valid
+      self.cur_mass = valid
 
-  def handle_input(self):
-    # quit game response
-    for event in pygame.event.get():
-      if event.type == pygame.QUIT:
-        self.running = False
+    def handle_input(self):
+      # quit game response
+      for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+          self.running = False
 
-      if event.type == pygame.MOUSEBUTTONDOWN:
-        if self.panel.input_obj.collidepoint(event.pos):
-          self.panel.text_active = True
-        else:
-          self.panel.text_active = False
+        if event.type == pygame.MOUSEBUTTONDOWN:
+          if self.panel.input_obj.collidepoint(event.pos):
+            self.panel.text_active = True
+          else:
+            self.panel.text_active = False
 
-        if self.panel.b_object.collidepoint(event.pos):
-          self.update_mass(self.panel.field_text)
+          if self.panel.b_object.collidepoint(event.pos):
+            self.update_mass(self.panel.field_text)
 
-        if self.addition.rect_obj.collidepoint(event.pos):
-          threshold = 10
-          self.bodies.append(Body([randint(threshold, WIDTH-threshold), randint(threshold, HEIGHT-threshold)], [randint(-15, 15), randint(-20, 20)], self.cur_mass))
+          if self.addition.rect_obj.collidepoint(event.pos):
+            threshold = 10
+            self.bodies.append(Body([randint(threshold, WIDTH-threshold), randint(threshold, HEIGHT-threshold)], [randint(-15, 15), randint(-20, 20)], self.cur_mass))
 
-      if self.panel.text_active and event.type == pygame.KEYDOWN:
-        if (event.key == pygame.K_RETURN):
-          self.panel.text_active = False
-        elif (event.key == pygame.K_BACKSPACE):
-          self.panel.update(self.panel.field_text[:-1])
-        else:
-          self.panel.update(self.panel.field_text + event.unicode)
+        if self.panel.text_active and event.type == pygame.KEYDOWN:
+          if (event.key == pygame.K_RETURN):
+            self.panel.text_active = False
+          elif (event.key == pygame.K_BACKSPACE):
+            self.panel.update(self.panel.field_text[:-1])
+          else:
+            self.panel.update(self.panel.field_text + event.unicode)
 
-  def draw(self):
-    # background
-    screen.fill("black")
+    def draw(self):
+      # background
+      screen.fill("black")
 
-    # render all the points
-    for body in self.bodies:
-      pygame.draw.circle(screen, body.color, (body.position[0], body.position[1]), body.radius)
+      # render all the points
+      for body in self.bodies:
+        pygame.draw.circle(screen, body.color, (body.position[0], body.position[1]), body.radius)
 
-    # ignore boilerplate
-    self.panel.render()
-    self.addition.render()
-    pygame.display.flip()
-    clock.tick()
+      # ignore boilerplate
+      self.panel.render()
+      self.addition.render()
+      pygame.display.flip()
+      clock.tick()
 
-  def engine(self):
-    G = 20
-    dt = 1/FPS
-    soften = 3
-    decay = 0.001
+    def engine(self):
+      G = 20
+      dt = 1/FPS
+      soften = 3
+      decay = 0.001
 
-    accelerations = [[0.0, 0.0] for _ in self.bodies]
-    for i, bodyA in enumerate(self.bodies):
-      ax = 0
-      ay = 0
+      accelerations = [[0.0, 0.0] for _ in self.bodies]
+      for i, bodyA in enumerate(self.bodies):
+        ax = 0
+        ay = 0
 
-      for j, bodyB in enumerate(self.bodies):
-          if i != j:
-              distance = sqrt((bodyA.position[0]-bodyB.position[0])**2 + (bodyA.position[1]-bodyB.position[1])**2)
-              if distance > 200:
-                  K = 0.4 * distance * G
-              else:
-                  K = G
+        for j, bodyB in enumerate(self.bodies):
+            if i != j:
+                distance = sqrt((bodyA.position[0]-bodyB.position[0])**2 + (bodyA.position[1]-bodyB.position[1])**2)
+                if distance > 200:
+                    K = 0.4 * distance * G
+                else:
+                    K = G
 
-              anet = (K * bodyB.mass) / (distance**2 + soften**2) # newtons law
-              ax += anet * (bodyB.position[0] - bodyA.position[0]) / distance
-              ay += anet * (bodyB.position[1] - bodyA.position[1]) / distance
-      accelerations[i] = [ax, ay]
+                anet = (K * bodyB.mass) / (distance**2 + soften**2) # newtons law
+                ax += anet * (bodyB.position[0] - bodyA.position[0]) / distance
+                ay += anet * (bodyB.position[1] - bodyA.position[1]) / distance
+        accelerations[i] = [ax, ay]
 
-    for k, body in enumerate(self.bodies): # this updates all the positions
-        body.velocity[0] += accelerations[k][0] * dt
-        body.velocity[1] += accelerations[k][1] * dt
-        body.position[0] += body.velocity[0] * dt
-        body.position[1] += body.velocity[1] * dt
+      for k, body in enumerate(self.bodies): # this updates all the positions
+          body.velocity[0] += accelerations[k][0] * dt
+          body.velocity[1] += accelerations[k][1] * dt
+          body.position[0] += body.velocity[0] * dt
+          body.position[1] += body.velocity[1] * dt
 
-        if body.position[0]-body.radius < 0 or body.position[0]+body.radius > WIDTH:
-          body.velocity[0] *= -1
+          if body.position[0]-body.radius < 0 or body.position[0]+body.radius > WIDTH:
+            body.velocity[0] *= -1
 
-        if body.position[1]-body.radius < 0 or body.position[1]+body.radius > HEIGHT:
-          body.velocity[1] *= -1
+          if body.position[1]-body.radius < 0 or body.position[1]+body.radius > HEIGHT:
+            body.velocity[1] *= -1
 
-        if decay == True:
-          body.mass = max(body.mass - decay * 0.5 * body.mass, 20)
-          body.update_rc()
+          if decay == True:
+            body.mass = max(body.mass - decay * 0.5 * body.mass, 20)
+            body.update_rc()
 
-game = Game()
+  game = Game()
 
-while game.running:
-  game.draw()
-  game.handle_input()
-  game.engine()
 
-pygame.quit()
+  while game.running:
+    game.draw()
+    game.handle_input()
+    game.engine()
+    await asyncio.sleep(0)
+
+  pygame.quit()
+
+asyncio.run(main())

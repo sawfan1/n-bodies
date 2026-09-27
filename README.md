@@ -4,6 +4,4 @@ The bodies have individual positions, velocities, and masses. The function in `h
 
 The physics is Newtonian (Newton's Law of Gravitation) but the attractive forces get stronger with distance after the bodies are seperated a certain distance. The bodies reflect off of the window walls as well (the velocity components are negated: multiplied with -1 so that the colliding bodies move the opposite way)
 
-You can also choose to enable decay, which will make the bodies lose mass over time.
-
 I use the `pygame-ce` version of pygame which is supported on Python 3.14. That's it really.
