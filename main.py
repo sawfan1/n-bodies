@@ -64,6 +64,16 @@ class Panel:
     NUMS.render_to(screen, (self.ipos[0] + 10,self.ipos[1] + 8), self.field_text, WHITE)
 
 
+class Button:
+  dimensions = [60, 30]
+  position = [(WIDTH-dimensions[0])/2, 500]
+  text = "ADD"
+  rect_obj = pygame.Rect(position[0], position[1], dimensions[0], dimensions[1])
+
+  def render(self):
+    pygame.draw.rect(screen, WHITE, self.rect_obj, 2)
+    GAME_FONT.render_to(screen, (self.position[0] + 10, self.position[1] + 10), self.text, WHITE)
+
 class Body:
   position = [200, 200]
   velocity = [2, 0]
@@ -80,6 +90,7 @@ class Body:
 class Game:
   running = True
   panel = Panel()
+  addition = Button()
   cur_mass = STARTING_MASS
 
   bodies = [Body([300, 200], [0, 0], 20),
@@ -135,6 +146,7 @@ class Game:
 
     # ignore boilerplate
     self.panel.render()
+    self.addition.render()
     pygame.display.flip()
     clock.tick()
 
