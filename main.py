@@ -196,13 +196,9 @@ class Game:
         if body.position[1]-body.radius < 0 or body.position[1]+body.radius > HEIGHT:
           body.velocity[1] *= -1
 
-        if decay:
+        if decay == True:
           body.mass = max(body.mass - decay * 0.5 * body.mass, 20)
-
-
-        body.update_rc()
-
-
+          body.update_rc()
 
 game = Game()
 
