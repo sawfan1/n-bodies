@@ -1,5 +1,6 @@
 import pygame
-import pygame.freetype\
+import pygame.freetype
+from math import sqrt
 
 from helpers import *
 
@@ -81,10 +82,11 @@ class Game:
   panel = Panel()
   cur_mass = STARTING_MASS
 
-  bodies = [Body([300, 200], [0, 0], 100), 
-  Body([150, 200], [0, 0]),
-  Body([300, 250], [0, 0]),
-  Body([300, 100], [0, 0])
+  bodies = [Body([300, 200], [0, 0], 20),
+  Body([150, 200], [5, 1], 40),
+  Body([300, 250], [-4, 20], 100),
+  Body([300, 100], [3, -20], 70),
+  Body([400, 100], [-7, 6], 120),
             ] # collection of bodies really
 
   def update_mass(self, new_mass):
@@ -137,17 +139,40 @@ class Game:
     clock.tick()
 
   def engine(self):
-    G = 67.67
+    G = 20
     dt = 1/FPS
-    soften = 4.0
+    soften = 3
 
     accelerations = [[0.0, 0.0] for _ in self.bodies]
-
     for i, bodyA in enumerate(self.bodies):
       ax = 0
       ay = 0
 
-      
+      for j, bodyB in enumerate(self.bodies):
+          if i != j:
+              distance = sqrt((bodyA.position[0]-bodyB.position[0])**2 + (bodyA.position[1]-bodyB.position[1])**2)
+              if distance > 200:
+                  K = 0.4 * distance * G
+              else:
+                  K = G
+
+              anet = (K * bodyB.mass) / (distance**2 + soften**2) # newtons law
+              ax += anet * (bodyB.position[0] - bodyA.position[0]) / distance
+              ay += anet * (bodyB.position[1] - bodyA.position[1]) / distance
+      accelerations[i] = [ax, ay]
+
+    for k, body in enumerate(self.bodies): # this updates all the positions
+        body.velocity[0] += accelerations[k][0] * dt
+        body.velocity[1] += accelerations[k][1] * dt
+        body.position[0] += body.velocity[0] * dt
+        body.position[1] += body.velocity[1] * dt
+
+        if body.position[0]-body.radius < 0 or body.position[0]+body.radius > WIDTH:
+          body.velocity[0] *= -1
+
+        if body.position[1]-body.radius < 0 or body.position[1]+body.radius > HEIGHT:
+          body.velocity[1] *= -1
+
 
 
 game = Game()
@@ -158,4 +183,3 @@ while game.running:
   game.engine()
 
 pygame.quit()
-
