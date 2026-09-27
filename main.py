@@ -1,6 +1,7 @@
 import pygame
 import pygame.freetype
 from math import sqrt
+from random import randint
 
 from helpers import *
 
@@ -127,6 +128,10 @@ class Game:
 
         if self.panel.b_object.collidepoint(event.pos):
           self.update_mass(self.panel.field_text)
+
+        if self.addition.rect_obj.collidepoint(event.pos):
+          threshold = 10
+          self.bodies.append(Body([randint(threshold, WIDTH-threshold), randint(threshold, HEIGHT-threshold)], [randint(-15, 15), randint(-20, 20)], self.cur_mass))
 
       if self.panel.text_active and event.type == pygame.KEYDOWN:
         if (event.key == pygame.K_RETURN):
