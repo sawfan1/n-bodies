@@ -123,8 +123,6 @@ class Game:
         else:
           self.panel.update(self.panel.field_text + event.unicode)
 
-      
-
   def draw(self):
     # background
     screen.fill("black")
@@ -138,12 +136,26 @@ class Game:
     pygame.display.flip()
     clock.tick()
 
+  def engine(self):
+    G = 67.67
+    dt = 1/FPS
+    soften = 4.0
+
+    accelerations = [[0.0, 0.0] for _ in self.bodies]
+
+    for i, bodyA in enumerate(self.bodies):
+      ax = 0
+      ay = 0
+
+      
+
 
 game = Game()
 
 while game.running:
   game.draw()
   game.handle_input()
+  game.engine()
 
 pygame.quit()
 

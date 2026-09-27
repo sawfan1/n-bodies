@@ -17,6 +17,3 @@ if __name__ == "__main__":
   trial_mass = float(input("Enter a mass: "))
   print("The colour is", color_from_mass(trial_mass))
   print("The radius is", radius_from_mass(trial_mass))
-
-
-# mass can be any number
