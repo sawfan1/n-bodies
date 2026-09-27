@@ -7,6 +7,9 @@ from helpers import *
 
 pygame.init()
 
+decay = input("Type W if you want decay, any other string disables it: ")
+decay = decay == "W"
+
 # parameters
 FPS = 60
 WIDTH = 800
@@ -80,6 +83,8 @@ class Body:
   velocity = [2, 0]
   mass = 5
 
+  def update_rc(self):
+    self.radius = radius_from_mass(self.mass)
 
   def __init__(self, pos, vel, mass=5):
     self.position = pos
@@ -159,6 +164,7 @@ class Game:
     G = 20
     dt = 1/FPS
     soften = 3
+    decay = 0.001
 
     accelerations = [[0.0, 0.0] for _ in self.bodies]
     for i, bodyA in enumerate(self.bodies):
@@ -189,6 +195,12 @@ class Game:
 
         if body.position[1]-body.radius < 0 or body.position[1]+body.radius > HEIGHT:
           body.velocity[1] *= -1
+
+        if decay:
+          body.mass = max(body.mass - decay * 0.5 * body.mass, 20)
+
+
+        body.update_rc()
 
 
 
